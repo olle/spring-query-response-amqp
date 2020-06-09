@@ -167,6 +167,14 @@ class Response<T> implements MessageListener, Logging {
 
         this.facade = facade;
         this.stats = stats;
+
+        addRegisteredResponseInfo();
+    }
+
+
+    private void addRegisteredResponseInfo() {
+
+        stats.addRegisteredResponse(this.routingKey);
     }
 
 

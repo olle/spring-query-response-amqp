@@ -39,13 +39,13 @@ class StatisticsTest {
 
     @SuppressWarnings("static-access")
     @Test
-    void ensureBuildsResponseOnApplicationReady() throws InterruptedException {
+    void ensureResponseForStatsRegistered() throws InterruptedException {
 
         ResponseRegistry.instance = () -> registry;
 
         var env = new MockEnvironment();
 
-        new Statistics(env, ctx).respond();
+        new Statistics(env, ctx).responseForStats();
 
         verify(registry).register(responses.capture());
 
@@ -59,6 +59,38 @@ class StatisticsTest {
         List<Stat> stats = new ArrayList<>();
         builder.elements().get().forEachRemaining(obj -> stats.add((Stat) obj));
         assertThat(stats.stream().map(s -> s.key).collect(Collectors.toList())).contains("count_queries");
+
+        ResponseRegistry.instance = () -> null;
+    }
+
+
+    @SuppressWarnings("static-access")
+    @Test
+    void ensureResponseForResponsesRegistered() throws Exception {
+
+        ResponseRegistry.instance = () -> registry;
+
+        var env = new MockEnvironment();
+
+        Statistics sut = new Statistics(env, ctx);
+        sut.addRegisteredResponse("foo");
+        sut.addRegisteredResponse("bar");
+        sut.addRegisteredResponse("baz");
+
+        sut.responseForResponses();
+
+        verify(registry).register(responses.capture());
+
+        ResponseBuilder<?> builder = responses.getValue();
+        assertThat(builder).isNotNull();
+
+        assertThat(builder.getRespondToTerm()).isEqualTo("query-response/responses");
+        assertThat(builder.elements().get()).isNotNull();
+        assertThat(builder.elements().get().hasNext()).isTrue();
+
+        List<String> responses = new ArrayList<>();
+        builder.elements().get().forEachRemaining(obj -> responses.add((String) obj));
+        assertThat(responses).containsExactlyInAnyOrder("foo", "bar", "baz");
 
         ResponseRegistry.instance = () -> null;
     }

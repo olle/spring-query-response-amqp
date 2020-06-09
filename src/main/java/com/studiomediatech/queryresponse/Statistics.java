@@ -27,9 +27,11 @@ import java.time.Instant;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -78,6 +80,8 @@ class Statistics implements Logging {
     protected Supplier<String> hostSupplier = () -> getHostnameOrDefault("unknown");
     protected Supplier<String> uptimeSupplier = () -> getUptimeOrDefault("-");
 
+    private final Set<String> responses = new HashSet<>();
+
     public Statistics(Environment env, ApplicationContext ctx) {
 
         this.env = env;
@@ -86,13 +90,30 @@ class Statistics implements Logging {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    void respond() {
+    void responses() {
+
+        responseForStats();
+        responseForResponses();
+    }
+
+
+    void responseForStats() {
 
         log().debug("Registering response for statistics queries...");
 
         ResponseBuilder.respondTo("query-response/stats", Stat.class)
             .withAll()
             .suppliedBy(this::getStats);
+    }
+
+
+    void responseForResponses() {
+
+        log().debug("Registering response for responses queries...");
+
+        ResponseBuilder.respondTo("query-response/responses", String.class)
+            .withAll()
+            .suppliedBy(() -> this.responses);
     }
 
 
@@ -307,6 +328,12 @@ class Statistics implements Logging {
         }
 
         latencies.add(latency);
+    }
+
+
+    public void addRegisteredResponse(String routingKey) {
+
+        responses.add(routingKey);
     }
 
     @JsonInclude(Include.NON_NULL)
