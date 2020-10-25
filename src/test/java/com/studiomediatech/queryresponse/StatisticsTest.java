@@ -34,6 +34,9 @@ class StatisticsTest {
     @Mock
     ResponseRegistry registry;
 
+    @Mock
+    RabbitFacade rabbitFacade;
+
     @Captor
     ArgumentCaptor<ChainingResponseBuilder<?>> responses;
 
@@ -45,7 +48,7 @@ class StatisticsTest {
 
         MockEnvironment env = new MockEnvironment();
 
-        new Statistics(env, ctx).respond();
+        new Statistics(env, ctx, rabbitFacade).respond();
 
         verify(registry).register(responses.capture());
 
@@ -70,7 +73,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade);
 
         String key = "only_responses";
         Stat s1 = sut.getStats().stream().filter(s -> key.equals(s.key)).findFirst().get();
@@ -93,7 +96,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade);
         sut.pidSupplier = () -> "some-pid";
 
         String key = "pid";
@@ -112,7 +115,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade);
         sut.nameSupplier = () -> "some-name";
 
         String key = "name";
@@ -131,7 +134,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade);
         sut.hostSupplier = () -> "some-host";
 
         String key = "host";
@@ -150,7 +153,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade);
         sut.uptimeSupplier = () -> "some-uptime";
 
         String key = "uptime";
@@ -169,7 +172,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade);
 
         String stat = "count_queries";
 
@@ -194,7 +197,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade);
 
         String stat = "count_consumed_responses";
 
@@ -219,7 +222,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade);
 
         String stat = "count_published_responses";
 
@@ -244,7 +247,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade);
 
         String stat = "throughput_queries";
 
@@ -270,7 +273,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade);
 
         String stat = "throughput_responses";
 
@@ -297,7 +300,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade);
 
         String stat = "count_fallbacks";
 
@@ -320,7 +323,7 @@ class StatisticsTest {
     void ensureMeasuresAndRetainsLatencyStatisticsInBoundedCollection() throws Exception {
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade);
 
         // NOOP
         sut.measureLatency(null, 43L);

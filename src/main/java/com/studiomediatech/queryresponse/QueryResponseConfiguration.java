@@ -87,9 +87,9 @@ class QueryResponseConfiguration implements Logging {
 
 
     @Bean
-    Statistics statistics(Environment env, ApplicationContext ctx) {
+    Statistics statistics(Environment env, ApplicationContext ctx, RabbitFacade rabbitFacade) {
 
-        return new Statistics(env, ctx);
+        return new Statistics(env, ctx, rabbitFacade);
     }
 
 

@@ -79,11 +79,15 @@ class Statistics implements Logging {
     protected Supplier<String> hostSupplier = () -> getHostnameOrDefault("unknown");
     protected Supplier<String> uptimeSupplier = () -> getUptimeOrDefault("-");
 
-    public Statistics(Environment env, ApplicationContext ctx) {
+    private final RabbitFacade rabbitFacade;
+
+    public Statistics(Environment env, ApplicationContext ctx, RabbitFacade rabbitFacade) {
 
         this.env = env;
         this.ctx = ctx;
         this.uuid = UUID.randomUUID().toString();
+
+        this.rabbitFacade = rabbitFacade;
     }
 
     @EventListener(ApplicationReadyEvent.class)
