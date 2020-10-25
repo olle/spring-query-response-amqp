@@ -15,6 +15,8 @@ import org.springframework.context.ApplicationContext;
 
 import org.springframework.mock.env.MockEnvironment;
 
+import org.springframework.scheduling.TaskScheduler;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +38,8 @@ class StatisticsTest {
 
     @Mock
     RabbitFacade rabbitFacade;
+    @Mock
+    TaskScheduler taskScheduler;
 
     @Captor
     ArgumentCaptor<ChainingResponseBuilder<?>> responses;
@@ -48,7 +52,7 @@ class StatisticsTest {
 
         MockEnvironment env = new MockEnvironment();
 
-        new Statistics(env, ctx, rabbitFacade).respond();
+        new Statistics(env, ctx, rabbitFacade, taskScheduler).respond();
 
         verify(registry).register(responses.capture());
 
@@ -73,7 +77,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx, rabbitFacade);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade, taskScheduler);
 
         String key = "only_responses";
         Stat s1 = sut.getStats().stream().filter(s -> key.equals(s.key)).findFirst().get();
@@ -96,7 +100,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx, rabbitFacade);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade, taskScheduler);
         sut.pidSupplier = () -> "some-pid";
 
         String key = "pid";
@@ -115,7 +119,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx, rabbitFacade);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade, taskScheduler);
         sut.nameSupplier = () -> "some-name";
 
         String key = "name";
@@ -134,7 +138,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx, rabbitFacade);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade, taskScheduler);
         sut.hostSupplier = () -> "some-host";
 
         String key = "host";
@@ -153,7 +157,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx, rabbitFacade);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade, taskScheduler);
         sut.uptimeSupplier = () -> "some-uptime";
 
         String key = "uptime";
@@ -172,7 +176,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx, rabbitFacade);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade, taskScheduler);
 
         String stat = "count_queries";
 
@@ -197,7 +201,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx, rabbitFacade);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade, taskScheduler);
 
         String stat = "count_consumed_responses";
 
@@ -222,7 +226,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx, rabbitFacade);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade, taskScheduler);
 
         String stat = "count_published_responses";
 
@@ -247,7 +251,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx, rabbitFacade);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade, taskScheduler);
 
         String stat = "throughput_queries";
 
@@ -273,7 +277,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx, rabbitFacade);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade, taskScheduler);
 
         String stat = "throughput_responses";
 
@@ -300,7 +304,7 @@ class StatisticsTest {
         ResponseRegistry.instance = () -> registry;
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx, rabbitFacade);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade, taskScheduler);
 
         String stat = "count_fallbacks";
 
@@ -323,7 +327,7 @@ class StatisticsTest {
     void ensureMeasuresAndRetainsLatencyStatisticsInBoundedCollection() throws Exception {
 
         MockEnvironment env = new MockEnvironment();
-        Statistics sut = new Statistics(env, ctx, rabbitFacade);
+        Statistics sut = new Statistics(env, ctx, rabbitFacade, taskScheduler);
 
         // NOOP
         sut.measureLatency(null, 43L);

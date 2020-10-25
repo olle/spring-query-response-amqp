@@ -14,6 +14,8 @@ import org.springframework.context.event.EventListener;
 
 import org.springframework.core.env.Environment;
 
+import org.springframework.scheduling.TaskScheduler;
+
 import org.springframework.util.StringUtils;
 
 import java.lang.management.ManagementFactory;
@@ -80,15 +82,37 @@ class Statistics implements Logging {
     protected Supplier<String> uptimeSupplier = () -> getUptimeOrDefault("-");
 
     private final RabbitFacade rabbitFacade;
+    private final TaskScheduler taskScheduler;
 
-    public Statistics(Environment env, ApplicationContext ctx, RabbitFacade rabbitFacade) {
+    public Statistics(Environment env, ApplicationContext ctx, RabbitFacade rabbitFacade,
+        TaskScheduler taskScheduler) {
 
         this.env = env;
         this.ctx = ctx;
-        this.uuid = UUID.randomUUID().toString();
 
+        this.taskScheduler = taskScheduler;
         this.rabbitFacade = rabbitFacade;
+
+        this.uuid = UUID.randomUUID().toString();
     }
+
+    @EventListener(ApplicationReadyEvent.class)
+    void schedule() {
+
+        log().debug("Scheduling statistics publishing...");
+
+        taskScheduler.schedule(this::publish, Instant.now());
+    }
+
+
+    void publish() {
+
+        Collection<Stat> stats = getStats();
+
+        log().debug("Publishing statistics {}", stats);
+        rabbitFacade.publishStatistics(stats);
+    }
+
 
     @EventListener(ApplicationReadyEvent.class)
     void respond() {

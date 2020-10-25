@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import org.springframework.context.ApplicationContext;
@@ -21,6 +22,8 @@ import org.springframework.context.support.GenericApplicationContext;
 
 import org.springframework.core.env.Environment;
 
+import org.springframework.scheduling.TaskScheduler;
+
 
 /**
  * Configures the required components for a Query/Response client, ensuring the availability of the necessary AMQP
@@ -29,7 +32,7 @@ import org.springframework.core.env.Environment;
 @Configuration
 @ConditionalOnClass(RabbitAutoConfiguration.class)
 @AutoConfigureAfter(RabbitAutoConfiguration.class)
-@Import(RabbitAutoConfiguration.class)
+@Import({ RabbitAutoConfiguration.class, TaskSchedulingAutoConfiguration.class })
 @EnableConfigurationProperties(QueryResponseConfigurationProperties.class)
 class QueryResponseConfiguration implements Logging {
 
@@ -87,9 +90,10 @@ class QueryResponseConfiguration implements Logging {
 
 
     @Bean
-    Statistics statistics(Environment env, ApplicationContext ctx, RabbitFacade rabbitFacade) {
+    Statistics statistics(Environment env, ApplicationContext ctx, RabbitFacade rabbitFacade,
+        TaskScheduler taskScheduler) {
 
-        return new Statistics(env, ctx, rabbitFacade);
+        return new Statistics(env, ctx, rabbitFacade, taskScheduler);
     }
 
 

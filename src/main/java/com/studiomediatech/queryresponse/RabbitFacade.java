@@ -1,5 +1,6 @@
 package com.studiomediatech.queryresponse;
 
+import com.studiomediatech.queryresponse.Statistics.Stat;
 import com.studiomediatech.queryresponse.util.Logging;
 
 import org.springframework.amqp.core.AcknowledgeMode;
@@ -20,6 +21,7 @@ import org.springframework.amqp.rabbit.listener.DirectMessageListenerContainer;
 
 import org.springframework.context.support.GenericApplicationContext;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -243,5 +245,11 @@ class RabbitFacade implements Logging {
             .setContentLength(message.getBody().length)
             .setHeader(HEADER_X_QR_PUBLISHED, System.currentTimeMillis())
             .build();
+    }
+
+
+    public void publishStatistics(Collection<Stat> stats) {
+
+        log().warn("NOT YET PUBLISHING! {}", stats);
     }
 }
