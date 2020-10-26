@@ -17,14 +17,8 @@ import org.springframework.mock.env.MockEnvironment;
 
 import org.springframework.scheduling.TaskScheduler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-
-import static org.mockito.Mockito.verify;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -43,33 +37,6 @@ class StatisticsTest {
 
     @Captor
     ArgumentCaptor<ChainingResponseBuilder<?>> responses;
-
-    @SuppressWarnings("static-access")
-    @Test
-    void ensureBuildsResponseOnApplicationReady() throws InterruptedException {
-
-        ResponseRegistry.instance = () -> registry;
-
-        MockEnvironment env = new MockEnvironment();
-
-        new Statistics(env, ctx, rabbitFacade, taskScheduler).respond();
-
-        verify(registry).register(responses.capture());
-
-        ChainingResponseBuilder<?> builder = responses.getValue();
-        assertThat(builder).isNotNull();
-
-        assertThat(builder.getRespondToTerm()).isEqualTo("query-response/stats");
-        assertThat(builder.elements().get()).isNotNull();
-        assertThat(builder.elements().get().hasNext()).isTrue();
-
-        List<Stat> stats = new ArrayList<>();
-        builder.elements().get().forEachRemaining(obj -> stats.add((Stat) obj));
-        assertThat(stats.stream().map(s -> s.key).collect(Collectors.toList())).contains("count_queries");
-
-        ResponseRegistry.instance = () -> null;
-    }
-
 
     @Test
     void ensureMetaWithPublishingOnlyStatus() throws Exception {

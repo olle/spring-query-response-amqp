@@ -1,5 +1,9 @@
 package com.studiomediatech.queryresponse;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 import com.studiomediatech.queryresponse.Statistics.Stat;
 import com.studiomediatech.queryresponse.util.Logging;
 
@@ -21,7 +25,10 @@ import org.springframework.amqp.rabbit.listener.DirectMessageListenerContainer;
 
 import org.springframework.context.support.GenericApplicationContext;
 
+import java.nio.charset.StandardCharsets;
+
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,14 +39,17 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 class RabbitFacade implements Logging {
 
-    public static final String HEADER_X_QR_PUBLISHED = "x-qr-published";
+    private static final String HEADER_X_QR_PUBLISHED = QueryResponseConfigurationProperties.HEADER_X_QR_PUBLISHED;
+    private static final String QUERY_RESPONSE_STATS_ROUTING_KEY =
+        QueryResponseConfigurationProperties.QUERY_RESPONSE_STATS_ROUTING_KEY;
+
+    private static final ObjectWriter writer = new ObjectMapper().writer();
 
     private final RabbitAdmin admin;
     private final ConnectionFactory connectionFactory;
     private final RabbitTemplate template;
     private final GenericApplicationContext ctx;
-
-    private TopicExchange queriesExchange;
+    private final TopicExchange queriesExchange;
 
     protected final Map<String, DirectMessageListenerContainer> containers = new ConcurrentHashMap<>();
 
@@ -250,6 +260,19 @@ class RabbitFacade implements Logging {
 
     public void publishStatistics(Collection<Stat> stats) {
 
-        log().warn("NOT YET PUBLISHING! {}", stats);
+        try {
+            byte[] body = writer.writeValueAsBytes(Collections.singletonMap("elements", stats));
+
+            Message message = MessageBuilder.withBody(body)
+                    .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+                    .setContentLength(body.length)
+                    .setContentEncoding(StandardCharsets.UTF_8.name())
+                    .build();
+
+            template.send(queriesExchange.getName(), QUERY_RESPONSE_STATS_ROUTING_KEY, message);
+            log().debug("|<-- Published stats: {}", message.getMessageProperties());
+        } catch (RuntimeException | JsonProcessingException ex) {
+            log().error("Failed to publish stats", ex);
+        }
     }
 }

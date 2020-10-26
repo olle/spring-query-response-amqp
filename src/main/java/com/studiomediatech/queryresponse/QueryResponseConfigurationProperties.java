@@ -9,6 +9,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "queryresponse")
 public class QueryResponseConfigurationProperties {
 
+    public static final String QUERY_RESPONSE_PREFIX = "query-response";
+    public static final String QUERY_RESPONSE_STATS_ROUTING_KEY = QUERY_RESPONSE_PREFIX + "/stats";
+    public static final String HEADER_X_QR_PUBLISHED = "x-qr-published";
+
     private ExchangeProperties exchange = new ExchangeProperties();
 
     public ExchangeProperties getExchange() {
@@ -27,7 +31,7 @@ public class QueryResponseConfigurationProperties {
         /**
          * Name of the shared topic exchange for queries.
          */
-        private String name = "query-response";
+        private String name = QUERY_RESPONSE_PREFIX;
 
         public String getName() {
 

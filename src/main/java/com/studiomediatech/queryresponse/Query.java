@@ -36,8 +36,7 @@ import java.util.stream.Collectors;
  */
 class Query<T> implements MessageListener, Logging {
 
-    private static final String HEADER_X_QR_PUBLISHED = RabbitFacade.HEADER_X_QR_PUBLISHED;
-
+    private static final String HEADER_X_QR_PUBLISHED = QueryResponseConfigurationProperties.HEADER_X_QR_PUBLISHED;
     private static final long ONE_MILLIS = 1L;
 
     private static final ObjectReader reader = new ObjectMapper().reader();

@@ -7,6 +7,8 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -35,6 +37,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @Import(RabbitAutoConfiguration.class)
 @EnableConfigurationProperties(QueryResponseConfigurationProperties.class)
 class QueryResponseConfiguration implements Logging {
+
+    private static final String QUERY_RESPONSE_TOPIC_EXCHANGE_BEAN_NAME = "queryResponseTopicExchange";
 
     private final QueryResponseConfigurationProperties props;
 
@@ -69,15 +73,16 @@ class QueryResponseConfiguration implements Logging {
 
     @Bean
     RabbitFacade rabbitFacade(RabbitAdmin rabbitAdmin, ConnectionFactory connectionFactory,
-        TopicExchange queriesExchange, GenericApplicationContext ctx) {
+        @Qualifier(QUERY_RESPONSE_TOPIC_EXCHANGE_BEAN_NAME) TopicExchange queryResponseTopicExchange,
+        GenericApplicationContext ctx) {
 
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
 
-        return new RabbitFacade(rabbitAdmin, rabbitTemplate, connectionFactory, queriesExchange, ctx);
+        return new RabbitFacade(rabbitAdmin, rabbitTemplate, connectionFactory, queryResponseTopicExchange, ctx);
     }
 
 
-    @Bean
+    @Bean(QUERY_RESPONSE_TOPIC_EXCHANGE_BEAN_NAME)
     TopicExchange queryResponseTopicExchange() {
 
         String name = props.getExchange().getName();
@@ -113,11 +118,11 @@ class QueryResponseConfiguration implements Logging {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskScheduler queryResponseFallbackTaskScheduler() {
+    public TaskScheduler queryResponseTaskScheduler() {
 
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
-        taskScheduler.setThreadNamePrefix("queryResponseFallbackTaskScheduler");
+        taskScheduler.setThreadNamePrefix("queryResponseTaskScheduler");
         taskScheduler.setPoolSize(5);
 
         return taskScheduler;

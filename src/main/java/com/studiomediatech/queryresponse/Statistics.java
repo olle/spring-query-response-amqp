@@ -120,17 +120,6 @@ class Statistics implements Logging {
     }
 
 
-    @EventListener(ApplicationReadyEvent.class)
-    void respond() {
-
-        log().debug("Registering response for statistics queries...");
-
-        ChainingResponseBuilder.respondTo("query-response/stats", Stat.class)
-            .withAll()
-            .suppliedBy(this::getStats);
-    }
-
-
     protected Collection<Stat> getStats() {
 
         return Arrays.asList( // NOSONAR

@@ -30,7 +30,7 @@ import java.util.function.Supplier;
  */
 class Response<T> implements MessageListener, Logging {
 
-    private static final String HEADER_X_QR_PUBLISHED = RabbitFacade.HEADER_X_QR_PUBLISHED;
+    private static final String HEADER_X_QR_PUBLISHED = QueryResponseConfigurationProperties.HEADER_X_QR_PUBLISHED;
 
     private static final ObjectWriter writer = new ObjectMapper().writer();
 
