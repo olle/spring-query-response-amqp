@@ -38,7 +38,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @EnableConfigurationProperties(QueryResponseConfigurationProperties.class)
 class QueryResponseConfiguration implements Logging {
 
-    private static final String QUERY_RESPONSE_TOPIC_EXCHANGE_BEAN_NAME = "queryResponseTopicExchange";
+    public static final String QUERY_RESPONSE_TOPIC_EXCHANGE_BEAN_NAME = "queryResponseTopicExchange";
 
     private final QueryResponseConfigurationProperties props;
 
