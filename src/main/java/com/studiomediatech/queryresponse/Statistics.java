@@ -27,6 +27,7 @@ import java.net.UnknownHostException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
@@ -41,6 +43,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
+/**
+ * Ensures that collection and publishing of statistics is done for every runtime Query/Response client.
+ */
 class Statistics implements Logging {
 
     // Yes, it's a FIB!!
@@ -97,20 +102,21 @@ class Statistics implements Logging {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    void schedule() {
+    void schedulePublishStats() {
 
-        log().debug("Scheduling statistics publishing...");
-
-        taskScheduler.schedule(this::publish, Instant.now());
+        long pause = ThreadLocalRandom.current().nextLong(5L, 42L);
+        log().debug("Scheduling statistics publishing in {} seconds...", pause);
+        taskScheduler.schedule(this::publishStats, Instant.now().plus(pause, ChronoUnit.SECONDS));
     }
 
 
-    void publish() {
+    void publishStats() {
 
         Collection<Stat> stats = getStats();
-
         log().debug("Publishing statistics {}", stats);
         rabbitFacade.publishStatistics(stats);
+
+        schedulePublishStats();
     }
 
 

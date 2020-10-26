@@ -11,7 +11,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import org.springframework.context.ApplicationContext;
@@ -23,6 +22,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.Environment;
 
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 
 /**
@@ -32,7 +32,7 @@ import org.springframework.scheduling.TaskScheduler;
 @Configuration
 @ConditionalOnClass(RabbitAutoConfiguration.class)
 @AutoConfigureAfter(RabbitAutoConfiguration.class)
-@Import({ RabbitAutoConfiguration.class, TaskSchedulingAutoConfiguration.class })
+@Import(RabbitAutoConfiguration.class)
 @EnableConfigurationProperties(QueryResponseConfigurationProperties.class)
 class QueryResponseConfiguration implements Logging {
 
@@ -108,5 +108,18 @@ class QueryResponseConfiguration implements Logging {
     QueryRegistry queryRegistry(RabbitFacade facade, Statistics stats) {
 
         return new QueryRegistry(facade, stats);
+    }
+
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TaskScheduler queryResponseFallbackTaskScheduler() {
+
+        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+
+        taskScheduler.setThreadNamePrefix("queryResponseFallbackTaskScheduler");
+        taskScheduler.setPoolSize(5);
+
+        return taskScheduler;
     }
 }
