@@ -2,17 +2,24 @@ package com.studiomediatech;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+
+import com.studiomediatech.QueryResponseUIApp.AppConfig;
 
 import com.studiomediatech.events.QueryRecordedEvent;
 
 import com.studiomediatech.queryresponse.QueryBuilder;
 import com.studiomediatech.queryresponse.util.Logging;
 
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+
 import org.springframework.context.event.EventListener;
 
 import org.springframework.util.StringUtils;
 
-import java.time.temporal.ChronoUnit;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +39,10 @@ public class QueryPublisher implements Logging {
     // This is a Fib!
     private static final int MAX_SIZE = 2584;
     private static final int SLIDING_WINDOW = 40;
+
+    private static final String QUERY_RESPONSE_STATS_QUEUE_BEAN = AppConfig.QUERY_RESPONSE_STATS_QUEUE_BEAN_NAME;
+
+    private static final ObjectReader reader = new ObjectMapper().reader();
 
     static ToLongFunction<QueryPublisher.Stat> statToLong = s -> ((Number) s.value).longValue();
 
@@ -78,12 +89,24 @@ public class QueryPublisher implements Logging {
     }
 
 
-    // @Scheduled(fixedDelay = 1000 * 7)
-    void query() {
+    @RabbitListener(queues = "#{@" + QUERY_RESPONSE_STATS_QUEUE_BEAN + "}")
+    void onStats(Message message) {
 
-        Collection<QueryPublisher.Stat> stats = queryBuilder.queryFor("query-response/stats",
-                    QueryPublisher.Stat.class)
-                .waitingFor(2L, ChronoUnit.SECONDS).orEmpty();
+        try {
+            log().info("|--> Received stats {}", message.getMessageProperties());
+
+            Stats stats = reader.readValue(message.getBody(), Stats.class);
+
+            if (stats.elements != null && !stats.elements.isEmpty()) {
+                handleStats(stats.elements);
+            }
+        } catch (RuntimeException | IOException ex) {
+            log().warn("Failed to handle query-response stats", ex);
+        }
+    }
+
+
+    void handleStats(Collection<QueryPublisher.Stat> stats) {
 
         stats.forEach(stat -> System.out.println("GOT STAT: " + stat));
 
@@ -251,6 +274,13 @@ public class QueryPublisher implements Logging {
         double sum = 1.0 * dest.stream().mapToLong(statToLong).sum();
 
         return Math.round((sum / duration) * 1000000.0) / 1000000.0;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Stats {
+
+        @JsonProperty
+        public Collection<Stat> elements;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

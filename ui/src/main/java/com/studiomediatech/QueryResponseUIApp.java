@@ -5,8 +5,15 @@ import com.studiomediatech.events.EventEmitter;
 
 import com.studiomediatech.queryresponse.EnableQueryResponse;
 import com.studiomediatech.queryresponse.QueryBuilder;
+import com.studiomediatech.queryresponse.QueryResponseConfigurationProperties;
 
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.Binding.DestinationType;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.connection.ConnectionNameStrategy;
+
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -41,7 +48,9 @@ public class QueryResponseUIApp {
 
     @Order(10)
     @Configuration
-    static class AppConfig {
+    public static class AppConfig {
+
+        protected static final String QUERY_RESPONSE_STATS_QUEUE_BEAN_NAME = "queryResponseStatsQueue";
 
         @Bean
         ConnectionNameStrategy connectionNameStrategy(Environment env) {
@@ -79,6 +88,25 @@ public class QueryResponseUIApp {
         QueryPublisher querier(SimpleWebSocketHandler handler, QueryBuilder queryBuilder) {
 
             return new QueryPublisher(handler, queryBuilder);
+        }
+
+
+        @Bean(QUERY_RESPONSE_STATS_QUEUE_BEAN_NAME)
+        Queue queryResponseStatsQueue(QueryResponseConfigurationProperties props) {
+
+            String name = props.getExchange().getName() + "-stats";
+
+            return QueueBuilder.nonDurable(name).autoDelete().ttl(60000).expires(600000).build();
+        }
+
+
+        @Bean
+        Binding queryResponseStatsQueueBinding(
+            @Qualifier(QUERY_RESPONSE_STATS_QUEUE_BEAN_NAME) Queue queryResponseStatsQueue,
+            QueryResponseConfigurationProperties props) {
+
+            return new Binding(queryResponseStatsQueue.getName(), DestinationType.QUEUE, props.getExchange().getName(),
+                    QueryResponseConfigurationProperties.QUERY_RESPONSE_STATS_ROUTING_KEY, null);
         }
     }
 
