@@ -54,7 +54,10 @@ public class QueryResponseUIApp {
         @Primary
         TaskScheduler taskScheduler() {
 
-            return new ThreadPoolTaskScheduler();
+            ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+            taskScheduler.setPoolSize(7);
+
+            return taskScheduler;
         }
 
 

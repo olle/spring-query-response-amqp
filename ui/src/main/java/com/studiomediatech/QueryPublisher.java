@@ -10,8 +10,6 @@ import com.studiomediatech.queryresponse.util.Logging;
 
 import org.springframework.context.event.EventListener;
 
-import org.springframework.scheduling.annotation.Scheduled;
-
 import org.springframework.util.StringUtils;
 
 import java.time.temporal.ChronoUnit;
@@ -80,7 +78,7 @@ public class QueryPublisher implements Logging {
     }
 
 
-    @Scheduled(fixedDelay = 1000 * 7)
+    // @Scheduled(fixedDelay = 1000 * 7)
     void query() {
 
         Collection<QueryPublisher.Stat> stats = queryBuilder.queryFor("query-response/stats",
