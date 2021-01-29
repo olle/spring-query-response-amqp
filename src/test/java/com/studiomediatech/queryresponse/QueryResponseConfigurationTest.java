@@ -94,19 +94,19 @@ class QueryResponseConfigurationTest {
         TopicExchange exchange = sut.queryResponseTopicExchange();
 
         assertThat(exchange.getName()).isEqualTo("query-response");
-        assertThat(exchange.isDurable()).isFalse();
-        assertThat(exchange.isAutoDelete()).isTrue();
+        assertThat(exchange.isDurable()).isTrue();
+        assertThat(exchange.isAutoDelete()).isFalse();
     }
 
     @Test
-    void ensureQueryResponseFanoutExchangeIsNonDurableAndAutoDelete() throws Exception {
+    void ensureQueryResponseFanoutExchangeIsDurableAndNotAutoDelete() throws Exception {
 
         QueryResponseConfiguration sut = new QueryResponseConfiguration(new QueryResponseConfigurationProperties());
 
         FanoutExchange exchange = sut.queryResponseFanoutExchange();
 
         assertThat(exchange.getName()).isEqualTo("query-response.fanout");
-        assertThat(exchange.isDurable()).isFalse();
-        assertThat(exchange.isAutoDelete()).isTrue();
+        assertThat(exchange.isDurable()).isTrue();
+        assertThat(exchange.isAutoDelete()).isFalse();
     }
 }

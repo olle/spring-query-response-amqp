@@ -10,8 +10,11 @@ import org.springframework.amqp.core.TopicExchange;
  */
 public class QueryResponseTopicExchange extends TopicExchange {
 
+    private static final boolean DURABLE = true;
+    private static final boolean AUTO_DELETE = false;
+
     public QueryResponseTopicExchange(String name) {
 
-        super(name, false, true);
+        super(name, DURABLE, AUTO_DELETE);
     }
 }

@@ -12,8 +12,11 @@ import org.springframework.amqp.core.FanoutExchange;
  */
 public final class QueryResponseFanoutExchange extends FanoutExchange {
 
+    private static final boolean DURABLE = true;
+    private static final boolean AUTO_DELETE = false;
+
     public QueryResponseFanoutExchange(String name) {
 
-        super(name, false, true);
+        super(name, DURABLE, AUTO_DELETE);
     }
 }
