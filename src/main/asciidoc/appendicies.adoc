@@ -11,18 +11,30 @@ link:apidocs/index.html[Java API Documentation] for {qr-name}.
 
 :AMQP: https://www.rabbitmq.com/protocol.html
 
-The declared {AMQP}[AMQP] broker resources are very limited. Only the 
-`query-response` topic-exchange is created. All active Query/Response services
-will automatically declare the required exchange, with the following parameters:
+The declared {AMQP}[AMQP] broker resources is kept to a minimum. Only two
+exchanges are declared, one for the data-plane and one for a control-plane. By
+default these are `query-response` and the `query-response.fanout`, with both
+names being configurable.
 
-```
+All Query/Response client services will automatically declare or connect to
+the required exchanges, with the following parameters:
+
+....
   name: query-response
   type: topic
-  auto-delete: true
-```
+  durable: true
+  auto-delete: false
+....
+
+....
+  name: query-response.fanout
+  type: fanout
+  durable: true
+  auto-delete: false
+....
 
 The Query/Response library defines a small set of properties and data-formats,
-which are used in the AMQP messages - a mini-protocol:
+which are used in the AMQP messages - a mini-protocol if you wish.
 
 === Query messages
 
@@ -33,17 +45,17 @@ property is set to the queue name of a generated `query-response-queue`,
 specific to the published query.
 
 Both query and response messages use the `application/json` content-type. There
-is no further content in the body, just an empty JSON object `{}`, as a
-placeholder.
+is no further content in the body, but **always** an empty JSON object `{}`, as
+a placeholder for future capabilities.
 
-```
+....
   exchange: query-response
   routing-key: ${query-term}
   reply-to: ${query-response-queue}
   content-type: application/json
   body:
   {}
-```
+....
 
 === Response messages
 
@@ -55,7 +67,7 @@ routing of responses back to the declared response-queue.
 The response body payload JSON structure always wraps the `elements` collection
 containing the actual response data in an _envelope object_.
 
-```
+....
   exchange: (default)
   routing-key: ${query-response-queue}
   content-type: application/json
@@ -63,7 +75,7 @@ containing the actual response data in an _envelope object_.
   {
     elements: [...]
   }
-```
+....
 
 The current properties of Query/Response messages are simple but provide
 room for extensions in future versions.

@@ -107,7 +107,7 @@ c.s.queryresponse.RabbitFacade           : |<-- Published query: marco - (Body:'
 ....
 
 At the moment there are no responses to be consumed, so after blocking for 1
-second, nothing is printed `STDOUT`.
+second, nothing is printed to `STDOUT`.
 
 == Responses
 
