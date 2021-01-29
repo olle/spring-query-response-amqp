@@ -13,7 +13,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 
 import org.springframework.core.env.Environment;
-
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.StringUtils;
 
 import java.lang.management.ManagementFactory;
@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 
 class Statistics implements Logging {
 
@@ -90,40 +89,39 @@ class Statistics implements Logging {
     void respond() {
 
         log().debug("Registering response for statistics queries...");
-
-        ChainingResponseBuilder.respondTo("query-response/stats", Stat.class)
-            .withAll()
-            .suppliedBy(this::getStats);
+        ChainingResponseBuilder.respondTo("query-response/stats", Stat.class).withAll().suppliedBy(this::getStats);
     }
 
+    @Scheduled(fixedRateString = "PT11S", initialDelayString = "PT11S")
+    void scheduled() {
+
+        log().warn("PUBLISHING STATS HERE: {}", getStats());
+    }
 
     protected Collection<Stat> getStats() {
 
         return Arrays.asList( // NOSONAR
-                    getPublishedQueriesCountStat(), // NOSONAR
-                    getConsumedResponsesCountStat(), // NOSONAR
-                    getPublishedResponsesCountStat(), // NOSONAR
-                    getFallbacksCountStat(), // NOSONAR
-                    getMeta(META_NAME, nameSupplier.get()), // NOSONAR
-                    getMeta(META_HOSTNAME, hostSupplier.get()), // NOSONAR
-                    getMeta(META_PID, pidSupplier.get()), // NOSONAR
-                    getMeta(META_UPTIME, uptimeSupplier.get()), // NOSONAR
-                    getMeta(META_RESPONSES, onlyResponses.get()), // NOSONAR
-                    getMaxLatencyStat(), // NOSONAR
-                    getMinLatencyStat(), // NOSONAR
-                    getAvgLatencyStat(), // NOSONAR
-                    getThroughputQueriesStat(), // NOSONAR
-                    getThroughputResponsesStat() // NOSONAR
-                )
-            .stream().filter(Objects::nonNull).collect(Collectors.toList());
+                getPublishedQueriesCountStat(), // NOSONAR
+                getConsumedResponsesCountStat(), // NOSONAR
+                getPublishedResponsesCountStat(), // NOSONAR
+                getFallbacksCountStat(), // NOSONAR
+                getMeta(META_NAME, nameSupplier.get()), // NOSONAR
+                getMeta(META_HOSTNAME, hostSupplier.get()), // NOSONAR
+                getMeta(META_PID, pidSupplier.get()), // NOSONAR
+                getMeta(META_UPTIME, uptimeSupplier.get()), // NOSONAR
+                getMeta(META_RESPONSES, onlyResponses.get()), // NOSONAR
+                getMaxLatencyStat(), // NOSONAR
+                getMinLatencyStat(), // NOSONAR
+                getAvgLatencyStat(), // NOSONAR
+                getThroughputQueriesStat(), // NOSONAR
+                getThroughputResponsesStat() // NOSONAR
+        ).stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
-
 
     private Stat getAvgLatencyStat() {
 
         return Stat.from(STAT_LATENCY_AVG, getAvgLatency(), this.uuid);
     }
-
 
     private Stat getMinLatencyStat() {
 
@@ -132,7 +130,6 @@ class Statistics implements Logging {
         return minLatency != null ? Stat.from(STAT_LATENCY_MIN, minLatency, this.uuid) : null;
     }
 
-
     private Stat getMaxLatencyStat() {
 
         Long maxLatency = getMaxLatency();
@@ -140,36 +137,30 @@ class Statistics implements Logging {
         return maxLatency != null ? Stat.from(STAT_LATENCY_MAX, maxLatency, this.uuid) : null;
     }
 
-
     private Stat getPublishedQueriesCountStat() {
 
         return Stat.from(STAT_COUNT_QUERIES, this.publishedQueriesCount.get(), this.uuid);
     }
-
 
     private Stat getConsumedResponsesCountStat() {
 
         return Stat.from(STAT_COUNT_CONSUMED_RESPONSES, this.consumedResponsesCount.get(), this.uuid);
     }
 
-
     private Stat getPublishedResponsesCountStat() {
 
         return Stat.from(STAT_COUNT_PUBLISHED_RESPONSES, this.publishedResponsesCount.get(), this.uuid);
     }
-
 
     private Stat getFallbacksCountStat() {
 
         return Stat.from(STAT_COUNT_FALLBACKS, this.fallbacksCount.get(), this.uuid);
     }
 
-
     private Stat getMeta(String key, Object value) {
 
         return Stat.from(key, value, this.uuid);
     }
-
 
     protected Stat getThroughputQueriesStat() {
 
@@ -178,14 +169,12 @@ class Statistics implements Logging {
         return Stat.at(STAT_TP_QUERIES, current - this.lastPublishedQueriesCount.getAndSet(current), this.uuid);
     }
 
-
     protected Stat getThroughputResponsesStat() {
 
         long current = this.publishedResponsesCount.get();
 
         return Stat.at(STAT_TP_RESPONSES, current - this.lastPublishedResponsesCount.getAndSet(current), this.uuid);
     }
-
 
     protected double getAvgLatency() {
 
@@ -196,7 +185,6 @@ class Statistics implements Logging {
         return latencies.stream().collect(Collectors.summarizingLong(Long::valueOf)).getAverage();
     }
 
-
     protected Long getMinLatency() {
 
         if (latencies.isEmpty()) {
@@ -205,7 +193,6 @@ class Statistics implements Logging {
 
         return latencies.stream().collect(Collectors.summarizingLong(Long::valueOf)).getMin();
     }
-
 
     protected Long getMaxLatency() {
 
@@ -216,7 +203,6 @@ class Statistics implements Logging {
         return latencies.stream().collect(Collectors.summarizingLong(Long::valueOf)).getMax();
     }
 
-
     protected String getUptimeOrDefault(String defaults) {
 
         try {
@@ -225,7 +211,6 @@ class Statistics implements Logging {
             return defaults;
         }
     }
-
 
     protected String getPidOrDefault(String defaults) {
 
@@ -243,7 +228,6 @@ class Statistics implements Logging {
 
         return defaults;
     }
-
 
     private Long maybeGetPid01() {
 
@@ -268,7 +252,6 @@ class Statistics implements Logging {
         }
     }
 
-
     private Long maybeGetPid02() {
 
         try {
@@ -277,7 +260,6 @@ class Statistics implements Logging {
             return null;
         }
     }
-
 
     protected String getHostnameOrDefault(String defaults) {
 
@@ -290,21 +272,15 @@ class Statistics implements Logging {
         }
 
         return Stream.of(System.getProperty("HOSTNAME"), hostName, System.getProperty("COMPUTERNAME"))
-            .filter(StringUtils::hasText)
-            .findFirst()
-            .orElse(defaults);
+                .filter(StringUtils::hasText).findFirst().orElse(defaults);
     }
-
 
     protected String getApplicationNameOrDefault(String defaults) {
 
         return Stream.of(env.getProperty("cola.id"), env.getProperty("spring.application.name"),
-                    ctx.getApplicationName(), ctx.getId(), ctx.getDisplayName())
-            .filter(StringUtils::hasText)
-            .findFirst()
-            .orElse(defaults);
+                ctx.getApplicationName(), ctx.getId(), ctx.getDisplayName()).filter(StringUtils::hasText).findFirst()
+                .orElse(defaults);
     }
-
 
     public void incrementPublishedQueriesCounter() {
 
@@ -312,24 +288,20 @@ class Statistics implements Logging {
         this.publishedQueriesCount.incrementAndGet();
     }
 
-
     public void incrementConsumedResponsesCounter() {
 
         this.consumedResponsesCount.incrementAndGet();
     }
-
 
     public void incrementPublishedResponsesCounter() {
 
         this.publishedResponsesCount.incrementAndGet();
     }
 
-
     public void incrementFallbacksCounter() {
 
         this.fallbacksCount.incrementAndGet();
     }
-
 
     public void measureLatency(Long publishedAtTimestamp, Long currentTimestamp) {
 
@@ -368,14 +340,12 @@ class Statistics implements Logging {
             this.value = value;
         }
 
-
         public Stat(String key, Object value, long timestamp, String uuid) {
 
             this(key, value);
             this.timestamp = timestamp;
             this.uuid = uuid;
         }
-
 
         public Stat(String key, Object value, String uuid) {
 
@@ -388,25 +358,22 @@ class Statistics implements Logging {
             return new Stat(key, value);
         }
 
-
         public static Stat at(String key, Object value, String uuid) {
 
             return new Stat(key, value, Instant.now(Clock.systemUTC()).toEpochMilli(), uuid);
         }
-
 
         public static Stat from(String key, Object value, String uuid) {
 
             return new Stat(key, value, uuid);
         }
 
-
         @Override
         public String toString() {
 
             return key + "=" + value // NOSONAR
-                + (timestamp != null ? " at=" + timestamp : "") // NOSONAR
-                + (uuid != null ? " from=" + uuid : "");
+                    + (timestamp != null ? " at=" + timestamp : "") // NOSONAR
+                    + (uuid != null ? " from=" + uuid : "");
         }
     }
 }

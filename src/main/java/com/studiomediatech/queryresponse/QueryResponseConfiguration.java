@@ -1,5 +1,7 @@
 package com.studiomediatech.queryresponse;
 
+import com.studiomediatech.queryresponse.amqp.QueryResponseFanoutExchange;
+import com.studiomediatech.queryresponse.amqp.QueryResponseTopicExchange;
 import com.studiomediatech.queryresponse.util.Logging;
 
 import org.springframework.amqp.core.FanoutExchange;
@@ -74,23 +76,13 @@ class QueryResponseConfiguration implements Logging {
     @Bean
     TopicExchange queryResponseTopicExchange() {
 
-        String name = props.getExchange().getName();
-
-        boolean durable = false;
-        boolean autoDelete = true;
-
-        return log(new TopicExchange(name, durable, autoDelete));
+        return log(new QueryResponseTopicExchange(props.getExchange().getName()));
     }
 
     @Bean
     FanoutExchange queryResponseFanoutExchange() {
 
-        String name = props.getFanoutExchange().getName();
-
-        boolean durable = false;
-        boolean autoDelete = true;
-
-        return log(new FanoutExchange(name, durable, autoDelete));
+        return log(new QueryResponseFanoutExchange(props.getFanoutExchange().getName()));
     }
 
     @Bean
