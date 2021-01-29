@@ -2,6 +2,7 @@ package com.studiomediatech.queryresponse;
 
 import com.studiomediatech.queryresponse.util.Logging;
 
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -21,10 +22,10 @@ import org.springframework.context.support.GenericApplicationContext;
 
 import org.springframework.core.env.Environment;
 
-
 /**
- * Configures the required components for a Query/Response client, ensuring the availability of the necessary AMQP
- * resources as well as a {@link QueryRegistry} and a {@link ResponseRegistry}.
+ * Configures the required components for a Query/Response client, ensuring the
+ * availability of the necessary AMQP resources as well as a
+ * {@link QueryRegistry} and a {@link ResponseRegistry}.
  */
 @Configuration
 @ConditionalOnClass(RabbitAutoConfiguration.class)
@@ -47,14 +48,12 @@ class QueryResponseConfiguration implements Logging {
         return new QueryBuilder(registry);
     }
 
-
     @Bean
     @ConditionalOnMissingBean
     public ResponseBuilder responseBuilder(ResponseRegistry registry) {
 
         return new ResponseBuilder(registry);
     }
-
 
     @Bean
     @ConditionalOnMissingBean
@@ -63,16 +62,14 @@ class QueryResponseConfiguration implements Logging {
         return new RabbitAdmin(connectionFactory);
     }
 
-
     @Bean
     RabbitFacade rabbitFacade(RabbitAdmin rabbitAdmin, ConnectionFactory connectionFactory,
-        TopicExchange queriesExchange, GenericApplicationContext ctx) {
+            TopicExchange queriesExchange, GenericApplicationContext ctx) {
 
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
 
         return new RabbitFacade(rabbitAdmin, rabbitTemplate, connectionFactory, queriesExchange, ctx);
     }
-
 
     @Bean
     TopicExchange queryResponseTopicExchange() {
@@ -85,6 +82,16 @@ class QueryResponseConfiguration implements Logging {
         return log(new TopicExchange(name, durable, autoDelete));
     }
 
+    @Bean
+    FanoutExchange queryResponseFanoutExchange() {
+
+        String name = props.getFanoutExchange().getName();
+
+        boolean durable = false;
+        boolean autoDelete = true;
+
+        return log(new FanoutExchange(name, durable, autoDelete));
+    }
 
     @Bean
     Statistics statistics(Environment env, ApplicationContext ctx) {
@@ -92,17 +99,16 @@ class QueryResponseConfiguration implements Logging {
         return new Statistics(env, ctx);
     }
 
-
     @Bean
     ResponseRegistry responseRegistry(RabbitFacade facade, Statistics stats) {
 
         return new ResponseRegistry(facade, stats, props);
     }
 
-
     @Bean
     QueryRegistry queryRegistry(RabbitFacade facade, Statistics stats) {
 
         return new QueryRegistry(facade, stats, props);
     }
+
 }
