@@ -7,8 +7,9 @@ JAVA_HOME=$(shell unset JAVA_HOME; /usr/libexec/java_home -v 11)
 # server for e2e integration.
 #
 run: node_modules
-	mvn clean
-	npm run watch & mvn spring-boot:run ; wait
+	./mvnw clean
+	npm run watch & \
+	  sleep 10; ./mvnw spring-boot:run ; wait
 
 #
 # Focused on client-side, this target will run a front-end only server, so
@@ -29,7 +30,7 @@ build: node_modules
 # NOTE: maven triggers the build target (above).
 #
 dist:
-	mvn package
+	./mvnw package
 
 node_modules:
 	npm install
