@@ -9,7 +9,7 @@ JAVA_HOME=$(shell unset JAVA_HOME; /usr/libexec/java_home -v 11)
 run: node_modules
 	./mvnw clean
 	npm run watch & \
-	  sleep 10; ./mvnw spring-boot:run ; wait
+	  sleep 5; ./mvnw spring-boot:run ; wait
 
 #
 # Focused on client-side, this target will run a front-end only server, so

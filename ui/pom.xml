@@ -6,7 +6,7 @@
 
     <groupId>com.studiomediatech</groupId>
     <artifactId>query-response-ui</artifactId>
-    <version>0</version>
+    <version>0.9</version>
     <name>Query/Response Monitoring UI</name>
 
     <parent>
