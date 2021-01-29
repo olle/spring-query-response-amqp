@@ -4,8 +4,8 @@ include::attributes.adoc[]
 
 {qr-name} is intended to be used in a landscape of distributed and highly
 decoupled services that exchange information and data. Being able to monitor and
-observe that is very important. We provide a monitoring and administration
-user interface for this purpose.
+observe such a system is very important. We provide a monitoring and
+administration user interface for this purpose.
 
 The latest built version of the {qr-ui-name} can be downloaded as a fat-jar
 from {qr-ui-link}[{qr-ui-link}]. To start {qr-ui-name} simply run:
@@ -14,11 +14,29 @@ from {qr-ui-link}[{qr-ui-link}]. To start {qr-ui-name} simply run:
 $ java -jar query-response-ui.jar
 ....
 
+Or use the published container image and run in your cloud environment of
+choice, or using Docker:
+
+[subs="attributes"]
+....
+$ docker run -t -p 8080:8080 {qr-ui-container}
+....
+
+NOTE: For a more complete quick-start example with Docker, please see the
+      {qr-ui-name} project {qr-ui-gh-link}[README].
+
+:ghcr-io: https://ghcr.io
+
+The {qr-ui-name} container images are published to the public {ghcr-io}[GitHub
+Packages] registry, and can be found in the project {qr-ui-container-link}[packages] 
+listing.
+
 == Overview
 
-The {qr-ui-name} connects to the RabbitMQ broker and **uses Query/Response**
-to query for information about the live nodes in the current system setup. It
-is available at http://localhost:8080 after starting up.
+The {qr-ui-name} makes good use of the AMQP broker messages and events, and 
+also uses Query/Response, to consume and query for information about the live
+nodes in the current system setup. It is available at http://localhost:8080
+after starting the app.
 
 image:ui.png[]
 

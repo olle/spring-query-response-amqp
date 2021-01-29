@@ -14,7 +14,8 @@ way you think and design, by using Query/Response for Spring AMQP.
 
 Query/Response provides tools to allow developers to monitor, measure, explore
 and discover the capabilities of their runtime system. Metrics and interactive
-utilities, built-in. See link:./ui/[ui] for more information.
+utilities, built-in. Checkout link:./ui/[the monitoring UI] for more
+information.
 
 image:ui/ui.png[]
 

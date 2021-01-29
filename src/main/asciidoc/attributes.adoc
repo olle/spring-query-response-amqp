@@ -32,3 +32,6 @@
 
 :qr-gh-link: https://github.com/olle/query-response-spring-amqp
 :qr-ui-link: https://github.com/olle/query-response-spring-amqp/raw/main/ui/query-response-ui.jar
+:qr-ui-gh-link: https://github.com/olle/query-response-spring-amqp/tree/main/ui
+:qr-ui-container: ghcr.io/olle/query-response-spring-amqp/query-response-ui:latest
+:qr-ui-container-link: https://github.com/users/olle/packages/container/package/query-response-spring-amqp%2Fquery-response-ui

@@ -1,17 +1,14 @@
 # Query/Response UI
 
-**WIP: Driving the goals and implementation of the UI with this README, please
-feel free to provide feedback and ideas through issues.**
-
-The Query/Response UI helps you gain insights and observe your active service
-landscape by providing rich information about how queries and responses are
-flowing throughout the system, in real-time.
+The Query/Response UI helps you gain insights and observe your system landscape
+by providing rich information about how queries and responses are flowing
+throughout the system, in real-time.
 
 ## Getting started
 
-The Query/Response UI makes use of the messaging network, and is _eating its
-own dog food_, by using queries to gather information about the current active
-system.
+The Query/Response UI makes good use of the broker eco-system, in providing a
+rich stream of information. It is also _eating its own dog food_, by using
+Query/Response to gather information and allow users to interact directly.
 
 ### Running in a container
 
@@ -72,7 +69,7 @@ Or set the environment variables:
 
 The Query/Response UI is intended to be a rather _thick client_ or _Single Page
 Application (SPA)_. It is built with the [Vue] framework. It is easy to start
-in development mode, using the `make dev` target. The Vue application is
+in development mode, using the `make dev` target. The Vue application is then
 available at http://localhost:3000.
 
 [vue]: https://vuejs.org
