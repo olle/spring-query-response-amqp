@@ -1,4 +1,4 @@
-package com.studiomediatech.events;
+package com.studiomediatech.queryresponseui.events;
 
 /**
  * Declares the contract provided to clients, on how an event can be emitted.

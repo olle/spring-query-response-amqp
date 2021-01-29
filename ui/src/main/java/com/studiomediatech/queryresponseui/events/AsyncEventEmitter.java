@@ -1,4 +1,4 @@
-package com.studiomediatech.events;
+package com.studiomediatech.queryresponseui.events;
 
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -25,8 +25,6 @@ public class AsyncEventEmitter implements EventEmitter {
     public void emitEvent(Object event) {
 
         // NOTE: Scheduled ASAP for any instant in the past.
-        Instant asap = Instant.EPOCH;
-
-        scheduler.schedule(() -> publisher.publishEvent(event), asap);
+        scheduler.schedule(() -> publisher.publishEvent(event), Instant.EPOCH);
     }
 }

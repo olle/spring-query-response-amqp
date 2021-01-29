@@ -1,12 +1,10 @@
-package com.studiomediatech;
+package com.studiomediatech.queryresponseui;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import com.studiomediatech.events.QueryRecordedEvent;
-
 import com.studiomediatech.queryresponse.QueryBuilder;
 import com.studiomediatech.queryresponse.util.Logging;
+import com.studiomediatech.queryresponseui.events.QueryIssuedEvent;
 
 import org.springframework.context.event.EventListener;
 
@@ -54,7 +52,7 @@ public class QueryPublisher implements Logging {
     }
 
     @EventListener
-    void on(QueryRecordedEvent event) {
+    void on(QueryIssuedEvent event) {
 
         log().info("HANDLING {}", event);
 
